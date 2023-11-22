@@ -1,0 +1,63 @@
+.search-form {
+  background-color: #3230ae;
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+body {
+  background-color: #f1ebeb;
+}
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.load-more {
+  display: inline-block;
+  padding: 10px 10px;
+  font-size: 1.2em;
+  text-align: center;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 5px;
+  background-color: #ff0000;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+.load-more:hover {
+  background-color: #b30068;
+  transform: scale(1.05);
+}
+.load-more.load-more-hidden {
+    display: none;
+  }
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+
+  .photo-card {
+    margin: 10px;
+    overflow: hidden;
+    background-color: #fff;
+  }
+  .photo-card  img {
+    width: 350px;
+    height: 200px;
+  }
+  
+  .info {
+    display: flex;
+    justify-content:space-between;
+    margin: 0px 10px 0px 10px;
+  }
+  
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: #333;
+  }
+  
