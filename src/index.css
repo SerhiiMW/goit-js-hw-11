@@ -29,7 +29,7 @@ body {
   background-color: #b30068;
   transform: scale(1.05);
 }
-.load-more.load-more-hidden {
+.hidden {
     display: none;
   }
 .gallery {
