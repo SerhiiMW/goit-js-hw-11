@@ -1,7 +1,5 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import axios from 'axios';
-// import SimpleLightbox from 'simplelightbox';
-// import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const refs = {
   form: document.querySelector('.search-form'),
@@ -21,11 +19,17 @@ let page = 1;
 refs.form.addEventListener('submit', handleSubmit);
 
 async function handleSubmit(event) {
+  refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
   event.preventDefault();
   refs.gallery.innerHTML = '';
   let searchParam = refs.input.value;
   try {
     const imgArr = await serviceGetImg(searchParam);
+    if (!imgArr.totalHits) {
+      throw Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
     let totalHits = imgArr.totalHits;
     Notify.info(`Hooray! We found ${totalHits} images.`);
     refs.gallery.innerHTML = createMarkup(imgArr.hits);
@@ -73,11 +77,6 @@ async function serviceGetImg(searchParam, page = 1) {
     per_page: 40,
   });
   const { data } = await axios.get(`${URL}?${params}`);
-  if (!data.totalHits) {
-    throw Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-  }
   return data;
 }
 
