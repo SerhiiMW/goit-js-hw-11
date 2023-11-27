@@ -1,5 +1,7 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import axios from 'axios';
+// import SimpleLightbox from 'simplelightbox';
+// import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const refs = {
   form: document.querySelector('.search-form'),
@@ -14,55 +16,49 @@ const classes = {
   loadMoreHidden: 'hidden',
 };
 
-refs.loadMoreBtn.classList.remove(classes.loadMoreHidden);
-
-
-// let totalHits = 0;
 let page = 1;
-
-async function handleLoadMore() {
-  page += 1;
-  const searchParam = refs.input.value;
-  // refs.loadMoreBtn.disabled = true;
-  // await serviceGetImg(searchParam, page)
-  try {
-      const imgArr = await serviceGetImg(searchParam, page);
-      refs.gallery.insertAdjacentHTML('beforeend', createMarkup(imgArr));
-
-      // if (data.page >= data.totalHits) {
-        // refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
-        // refs.loadMoreBtn.removeEventListener('click', handleLoadMore);
-        // Notify.failure(
-        //   'Sorry, there are no images matching your search query. Please try again.'
-        // )
-        // return;
-      // }
-      // refs.loadMoreBtn.disabled = false;
-    } catch (err) {
-      console.log(err);
-    }
-}
 
 refs.form.addEventListener('submit', handleSubmit);
 
 async function handleSubmit(event) {
   event.preventDefault();
   refs.gallery.innerHTML = '';
-  const searchParam = refs.input.value;
+  let searchParam = refs.input.value;
   try {
     const imgArr = await serviceGetImg(searchParam);
-    refs.gallery.innerHTML = createMarkup(imgArr);
-    if (page < 100) {
-      refs.loadMoreBtn.classList.remove(classes.loadMoreHidden);
-      refs.loadMoreBtn.addEventListener('click', handleLoadMore);
-    }
+    let totalHits = imgArr.totalHits;
+    Notify.info(`Hooray! We found ${totalHits} images.`);
+    refs.gallery.innerHTML = createMarkup(imgArr.hits);
+    refs.loadMoreBtn.classList.remove(classes.loadMoreHidden);
+    refs.loadMoreBtn.addEventListener('click', handleLoadMore);
   } catch (err) {
     console.log(err);
-  } 
-  // finally {
-  //   refs.form.reset();
-  // }
+  }
 }
+
+async function handleLoadMore() {
+  refs.loadMoreBtn.disabled = true;
+  page += 1;
+  let searchParam = refs.input.value;
+  try {
+    const imgArr = await serviceGetImg(searchParam);
+    refs.gallery.insertAdjacentHTML('beforeend', createMarkup(imgArr.hits));
+    let galleryLength = 0;
+    galleryLength = refs.gallery.childNodes.length;
+    if (galleryLength >= imgArr.totalHits) {
+      refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
+      refs.loadMoreBtn.removeEventListener('click', handleLoadMore);
+      Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
+      return;
+    }
+    refs.loadMoreBtn.disabled = false;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 
 async function serviceGetImg(searchParam, page = 1) {
   const URL = 'https://pixabay.com/api/';
@@ -82,27 +78,22 @@ async function serviceGetImg(searchParam, page = 1) {
       'Sorry, there are no images matching your search query. Please try again.'
     );
   }
-  return data.hits.map(
-    ({
-      webformatURL,
-      largeImageURL,
-      tags,
-      likes,
-      views,
-      comments,
-      downloads,
-    }) => {
-      return { webformatURL, tags, likes, views, comments, downloads, largeImageURL};
-    }
-  );
+  return data;
 }
 
 function createMarkup(arr) {
   return arr
     .map(
-      ({ webformatURL, tags, likes, views, comments, downloads }) =>
-        `<div class="photo-card">
-                        <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+      ({
+        webformatURL,
+        tags,
+        likes,
+        views,
+        comments,
+        downloads,
+      }) =>
+        `<div class="gallery__item">
+                        <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
                         <div class="info">
                             <p class="info-item">
                                 <b>Likes</b>${likes}
