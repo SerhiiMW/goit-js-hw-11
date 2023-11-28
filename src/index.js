@@ -18,6 +18,28 @@ let page = 1;
 
 refs.form.addEventListener('submit', handleSubmit);
 
+async function handleLoadMore() {
+  let searchParam = refs.input.value;
+  try {
+    page += 1;
+    const imgArr = await serviceGetImg(searchParam, page);
+    refs.gallery.insertAdjacentHTML('beforeend', createMarkup(imgArr.hits));
+    let galleryLength = 0;
+    galleryLength = refs.gallery.childNodes.length;
+    if (galleryLength >= imgArr.totalHits) {
+      refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
+      refs.loadMoreBtn.removeEventListener('click', handleLoadMore);
+      Notify.failure(
+        "We're sorry, but you've reached the end of search results."
+      );
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+    finally { page = 1 };
+}
+
 async function handleSubmit(event) {
   refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
   event.preventDefault();
@@ -33,31 +55,16 @@ async function handleSubmit(event) {
     let totalHits = imgArr.totalHits;
     Notify.info(`Hooray! We found ${totalHits} images.`);
     refs.gallery.innerHTML = createMarkup(imgArr.hits);
-    refs.loadMoreBtn.classList.remove(classes.loadMoreHidden);
-    refs.loadMoreBtn.addEventListener('click', handleLoadMore);
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-async function handleLoadMore() {
-  refs.loadMoreBtn.disabled = true;
-  page += 1;
-  let searchParam = refs.input.value;
-  try {
-    const imgArr = await serviceGetImg(searchParam);
-    refs.gallery.insertAdjacentHTML('beforeend', createMarkup(imgArr.hits));
-    let galleryLength = 0;
-    galleryLength = refs.gallery.childNodes.length;
-    if (galleryLength >= imgArr.totalHits) {
+    if (totalHits <= 40) {
       refs.loadMoreBtn.classList.add(classes.loadMoreHidden);
       refs.loadMoreBtn.removeEventListener('click', handleLoadMore);
       Notify.failure(
         "We're sorry, but you've reached the end of search results."
       );
       return;
-    }
-    refs.loadMoreBtn.disabled = false;
+      }
+    refs.loadMoreBtn.classList.remove(classes.loadMoreHidden);
+    refs.loadMoreBtn.addEventListener('click', handleLoadMore);
   } catch (err) {
     console.log(err);
   }
