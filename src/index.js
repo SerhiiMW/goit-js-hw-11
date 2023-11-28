@@ -37,7 +37,7 @@ async function handleLoadMore() {
   } catch (err) {
     console.log(err);
   }
-    finally { page = 1 };
+
 }
 
 async function handleSubmit(event) {
@@ -67,7 +67,9 @@ async function handleSubmit(event) {
     refs.loadMoreBtn.addEventListener('click', handleLoadMore);
   } catch (err) {
     console.log(err);
-  }
+  }  finally { 
+      page = 1
+    }
 }
 
 
